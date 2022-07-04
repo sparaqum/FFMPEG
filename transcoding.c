@@ -28,12 +28,13 @@
  */
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavfilter/avfiltergraph.h>
-#include <libavfilter/avcodec.h>
+//#include <libavfilter/avfiltergraph.h>
+//#include <libavfilter/avcodec.h>
 #include <libavfilter/buffersink.h>
 #include <libavfilter/buffersrc.h>
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
+
 static AVFormatContext *ifmt_ctx;
 static AVFormatContext *ofmt_ctx;
 typedef struct FilteringContext {
@@ -41,7 +42,9 @@ typedef struct FilteringContext {
     AVFilterContext *buffersrc_ctx;
     AVFilterGraph *filter_graph;
 } FilteringContext;
+
 static FilteringContext *filter_ctx;
+
 static int open_input_file(const char *filename)
 {
     int ret;
@@ -140,7 +143,7 @@ static int open_output_file(const char *filename)
             }
         }
         if (ofmt_ctx->oformat->flags & AVFMT_GLOBALHEADER)
-            enc_ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
+            enc_ctx->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
     }
     av_dump_format(ofmt_ctx, 0, filename, 1);
     if (!(ofmt_ctx->oformat->flags & AVFMT_NOFILE)) {
@@ -388,7 +391,7 @@ static int flush_encoder(unsigned int stream_index)
     int ret;
     int got_frame;
     if (!(ofmt_ctx->streams[stream_index]->codec->codec->capabilities &
-                CODEC_CAP_DELAY))
+                AV_CODEC_CAP_DELAY))
         return 0;
     while (1) {
         av_log(NULL, AV_LOG_INFO, "Flushing stream #%u encoder\n", stream_index);
@@ -506,4 +509,3 @@ end:
         av_log(NULL, AV_LOG_ERROR, "Error occurred: %s\n", av_err2str(ret));
     return ret ? 1 : 0;
 }
-
